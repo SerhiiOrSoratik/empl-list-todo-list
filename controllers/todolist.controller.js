@@ -22,8 +22,15 @@ class TodoList {
     }
 
     async updateTask(req, res) {
-        const done = req.body.done;
-        const task = await db.query(`UPDATE todolist SET done=${done} WHERE id=${req.params.id} RETURNING *`);
+        const keys = [];
+        let str = '';
+        for (let key in req.body) {
+            keys.push(key);
+        }
+        keys.forEach((key, index) => {
+            str += `${key}='${req.body[key]}'${index !== keys.length - 1 ? ', ' : ' '}` 
+        });
+        const task = await db.query(`UPDATE todolist SET ${str}WHERE id=${req.params.id} RETURNING *`);
         res.status(200);
         res.json(task.rows);
     }
