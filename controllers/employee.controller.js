@@ -6,7 +6,6 @@ class EmployeeController {
     async getEmployees(req, res) {
         const variant = req.params.variant;
         const employees = await db.query('SELECT * FROM empl_list');
-        
         res.end(main(employees.rows, variant));
     }
 }
