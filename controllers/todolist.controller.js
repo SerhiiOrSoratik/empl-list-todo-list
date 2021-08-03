@@ -22,17 +22,26 @@ class TodoList {
     }
 
     async updateTask(req, res) {
-        const keys = [];
-        let str = '';
-        for (let key in req.body) {
-            keys.push(key);
+        let task = {};
+        if (req.body.title && !req.body.done && !req.body.due_date) {
+            task = await db.query(`UPDATE todolist SET title=$1 WHERE id=${req.params.id} RETURNING *`, [req.body.title]);
+            res.status(200);
+            res.json(task.rows);
         }
-        keys.forEach((key, index) => {
-            str += `${key}='${req.body[key]}'${index !== keys.length - 1 ? ', ' : ' '}` 
-        });
-        const task = await db.query(`UPDATE todolist SET ${str}WHERE id=${req.params.id} RETURNING *`);
-        res.status(200);
-        res.json(task.rows);
+        else if (!req.body.title && req.body.done && !req.body.due_date) {
+            task = await db.query(`UPDATE todolist SET done=$1 WHERE id=${req.params.id} RETURNING *`, [req.body.done]);
+            res.status(200);
+            res.json(task.rows);
+        }
+        else if (!req.body.title && !req.body.done && req.body.due_date) {
+            task = await db.query(`UPDATE todolist SET due_date=$1 WHERE id=${req.params.id} RETURNING *`, [req.body.due_date]);
+            res.status(200);
+            res.json(task.rows);
+        }
+        else {
+            res.status(400);
+            res.end('Bad request');
+        } 
     }
 
     async putTask(req, res) {
